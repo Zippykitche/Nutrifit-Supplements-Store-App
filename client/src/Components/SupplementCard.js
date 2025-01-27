@@ -19,7 +19,7 @@ return (
             }}
           >
           <img
-            src="/Nutrifit-supplements/images/cart.png"
+            src="/images/cart.png"
             alt="Add to cart"
             className="cart-icon-img"
           />

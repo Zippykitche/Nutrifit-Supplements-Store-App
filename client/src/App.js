@@ -40,7 +40,7 @@ function App() {
   };
 
   return (
-    <Router basename="/Nutrifit-supplements" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <Router>
         <Header cartCount={cart.length} />
         <div className={`notification ${showNotification ? "show" : ""}`}>
         Supplement added to cart!

@@ -4,7 +4,7 @@ import SupplementCard from "./SupplementCard";
 function Home({items, addToCart}) {
 const [supplements, setSupplements] = useState([]);
 const url = process.env.NODE_ENV === 'development' 
-    ? "http://localhost:4000/supplements" 
+    ? "http://localhost:3000/supplements" 
     : "https://my-json-server.typicode.com/Zippykitche/Nutrifit-supplements/supplements";
 
 const [searchQuery, setSearchQuery] = useState('');
@@ -34,7 +34,7 @@ return (
       <h1>Elevate Your Health</h1>
       <div className="shop-now-box">SHOP NOW</div>
       <div className="title-images">
-        <img src="/Nutrifit-supplements/images/person.png" alt="person" className="person-image" />
+        <img src="/images/person.png" alt="person" className="person-image" />
       </div>
     </div>
 

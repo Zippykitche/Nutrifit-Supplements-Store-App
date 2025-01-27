@@ -5,14 +5,14 @@
         "name": "Pre-Workout",
         "description": "Support Nitric-Oxide production. Increase energy and reduce muscle fatigue. ",
         "price": 3000,
-        "image": "/Nutrifit-supplements/images/Pre-Workout.png"
+        "image": "/images/Pre-Workout.png"
       },
       {
         "id": 2,
         "name": "FoliGROWTH",
         "description": "THICKER HAIR GROWTH, HAIR LOSS TREATMENT, GROW FULLER HAIR, and ANTI-AGING for SKIN and Nails: uses patented ingredients like Opti MSM and clinically developed cellular support with 5000mcg of Biotin, Saw Palmetto, Hyaluronic Acid, Choline, Silica, Vitamin C, and 2000iu Vitamin D3. 28 herbs and vitamins.",
         "price": 8000,
-        "image": "/Nutrifit-supplements/images/foligrowth.png"
+        "image": "/images/foligrowth.png"
 
       },
       {
@@ -20,56 +20,56 @@
         "name": "EXCELLAPRO Nan Stage 1",
         "description": "Over 155 years of scientific expertise in Infant Nutrition:Nestlé develops infant nutrition products backed by evolving science and research. Innovation has been at the heart of Nestlé since its beginning.",
         "price": 1500,
-        "image": "/Nutrifit-supplements/images/Nan.png"
+        "image": "/images/Nan.png"
       },
       {
         "id": 4,
         "name": "Mamalait 250G",
         "description": "Mamalait is a supplement drink that improves breast milk production and even its quality so that your baby is well nourished.",
         "price": 3300,
-        "image": "/Nutrifit-supplements/images/Mamalait.png"
+        "image": "/images/Mamalait.png"
       },
       {
         "id": 5,
         "name": "TESTO-7X",
         "description": "𝗣𝗥𝗘-𝗪𝗢𝗥𝗞𝗢𝗨𝗧 𝗧𝗘𝗦𝗧𝗢𝗦𝗧𝗘𝗥𝗢𝗡𝗘 𝗕𝗢𝗢𝗦𝗧𝗘𝗥 𝗙𝗢𝗥 𝗠𝗘𝗡: It contains Tribulus terrestris, Kaunch Beej, Ashwagandha, Fenugreek extract, Safed Musli Extract, Gingko Biloba Extract & L-Citrulline for 7X MORE BENEFITS!",
         "price": 3500,
-        "image": "/Nutrifit-supplements/images/Testo.png"
+        "image": "/images/Testo.png"
       },
       {
         "id": 6,
         "name": "Pregnacare-Plus",
         "description": "Pregnacare-Plus is leading supplement in pregnancy care, with high quality Omega-3 (DHA 300mg) capsules, in a convenient 2-in-1 pack, for use throughout pregnancy.",
         "price": 2500,
-        "image": "/Nutrifit-supplements/images/pregnacare-plus.jpg"
+        "image": "/images/pregnacare-plus.jpg"
       },
       {
         "id": 7,
         "name": "Glow Skin Gummies (Orange Flavour)",
         "description": "Glow Skin Gummies are carefully produced with natural Vitamin C, Vitamin E, Copper, Zinc, Selenium, antioxidants rich herbs and Hyaluronic Acid – all of these ingredients can help with early signs of ageing, can help improve skin elasticity, skin hydration, skin texture and perfectly enhance your skin health inside out over time.",
         "price": 7000,
-        "image": "/Nutrifit-supplements/images/GlowSkinGummies.png"
+        "image": "/images/GlowSkinGummies.png"
       },
       {
         "id": 8,
         "name": "Probiotic Supplement",
         "description": "PROBIOTICS & PREBIOTICS: Our prebiotics and probiotics for men and women help nourish existing good bacteria in the digestive tract and provide additional beneficial bacteria for balanced protection and relief.",
         "price": 2500,
-        "image": "/Nutrifit-supplements/images/probiotic.png"
+        "image": "/images/probiotic.png"
       },
       {
         "id": 9,
         "name": "GAIN +",
         "description": "NUTRITHICK Multivitamin Dietary Supplement for Women is the perfect blend of vitamins, minerals, and herbs to give you a healthy booster, and promote muscle growth.",
         "price": 4000,
-        "image": "/Nutrifit-supplements/images/GAIN+.png"
+        "image": "/images/GAIN+.png"
       },
       {
         "id": 10,
         "name": "Appetite Booster",
         "description": "Gaining weight starts with eating more. Our Appetite Booster helps improve your appetite to help you on your weight gaining journey.",
         "price": 5500,
-        "image": "/Nutrifit-supplements/images/Appetite-Booster.png"
+        "image": "/images/Appetite-Booster.png"
       }
     ]
   }
