@@ -18,7 +18,7 @@ function Sell({ items = [], setItems}) {
       image: itemImage,
     };
 
-    fetch("https://my-json-server.typicode.com/Zippykitche/Nutrifit-supplements/supplements", {
+    fetch("http://127.0.0.1:5555/", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

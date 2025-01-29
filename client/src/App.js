@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from "react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './Components/Home';
 import Cart from './Components/Cart';
 import Sell from './Components/Sell';
 import Header from './Components/Header';
+import SignIn from "./Components/SignIn";
+import Login from "./Components/Login";
 import './App.css';
 
 function App() {
@@ -38,17 +40,50 @@ function App() {
       setShowNotification(false);
     }, 2000);
   };
+  const ProtectedRoute = ({ children, roleRequired, ...rest }) => {
+    const userRole = localStorage.getItem("role");
+    const username = localStorage.getItem("username"); // Check for username
+
+    if (!username) {
+      return <Navigate to="/login" />; // Redirect to login if no username
+    }
+
+    if (userRole !== roleRequired) {
+      return <Navigate to="/" />; // Redirect if role doesn't match
+    }
+
+    return children;
+  };
 
   return (
+    
     <Router>
-        <Header cartCount={cart.length} />
-        <div className={`notification ${showNotification ? "show" : ""}`}>
+      <Header cartCount={cart.length} />
+      <div className={`notification ${showNotification ? "show" : ""}`}>
         Supplement added to cart!
       </div>
       <Routes>
         <Route path="/" element={<Home items={saleItems} addToCart={addToCart} />} />
-        <Route path="/Cart" element={<Cart cartItems={cart} />}  />
-        <Route path="/Sell" element={<Sell items={saleItems} setItems={addItemForSale} />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected routes */}
+        <Route 
+          path="/Cart" 
+          element={
+            <ProtectedRoute roleRequired="buyer">
+              <Cart cartItems={cart} />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/Sell" 
+          element={
+            <ProtectedRoute roleRequired="seller">
+              <Sell items={saleItems} setItems={addItemForSale} />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
     </Router>
   );

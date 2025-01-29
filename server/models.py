@@ -8,7 +8,7 @@ from config import db
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
-    serialize_rules = ('-cart_items.user', '-purchases.user', '-items.seller')
+    serialize_rules = ('-cart_items.user', '-purchases.user', '-items.seller', '-cart_items.item.cart_items', '-purchases.item.purchases')
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
@@ -31,8 +31,8 @@ class User(db.Model, SerializerMixin):
     def is_valid(self):
         if not self.username or not self.email or not self.password:
             raise ValueError("Username, email, and password are required fields.")
-        if self.role not in ['buyer', 'seller', 'admin']:
-            raise ValueError("Role must be one of 'buyer', 'seller', or 'admin'.")
+        if self.role not in ['buyer', 'seller']:
+            raise ValueError("Role must be 'buyer' or 'seller'.")
 
 
 # Item Category model
@@ -55,7 +55,7 @@ class ItemCategory(db.Model, SerializerMixin):
 class Item(db.Model, SerializerMixin):
     __tablename__ = 'items'
 
-    serialize_rules = ('-cart_items.item', '-purchases.item', '-seller.items', '-category.items')
+    serialize_rules = ('-cart_items.item', '-purchases.item', '-seller.items', '-category.items', '-cart_items.user.cart_items', '-purchases.user.purchases')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -80,7 +80,7 @@ class Item(db.Model, SerializerMixin):
 class CartItem(db.Model, SerializerMixin):
     __tablename__ = 'cart_items'
 
-    serialize_rules = ('-user.cart_items', '-item.cart_items')
+    serialize_rules = ('-user.cart_items', '-item.cart_items', '-user.purchases', '-item.purchases')
 
     id = db.Column(db.Integer, primary_key=True)
     quantity = db.Column(db.Integer, nullable=False, default=1)
@@ -95,12 +95,12 @@ class CartItem(db.Model, SerializerMixin):
 class Purchase(db.Model, SerializerMixin):
     __tablename__ = 'purchases'
 
-    serialize_rules = ('-user.purchases', '-item.purchases')
+    serialize_rules = ('-user.purchases', '-item.purchases', '-user.cart_items', '-item.cart_items')
 
     id = db.Column(db.Integer, primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
-    purchase_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    purchase_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
 

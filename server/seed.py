@@ -42,7 +42,7 @@ if __name__ == '__main__':
                 username=fake.user_name(),
                 email=fake.email(),
                 password=fake.password(),
-                role=rc(['buyer', 'seller', 'admin'])
+                role=rc(['buyer', 'seller'])
             )
             users.append(user)
         db.session.add_all(users)

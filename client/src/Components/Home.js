@@ -3,9 +3,7 @@ import SupplementCard from "./SupplementCard";
 
 function Home({items, addToCart}) {
 const [supplements, setSupplements] = useState([]);
-const url = process.env.NODE_ENV === 'development' 
-    ? "http://localhost:3000/supplements" 
-    : "https://my-json-server.typicode.com/Zippykitche/Nutrifit-supplements/supplements";
+const url = "http://127.0.0.1:5555";
 
 const [searchQuery, setSearchQuery] = useState('');
 
