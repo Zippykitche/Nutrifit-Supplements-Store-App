@@ -8,18 +8,34 @@ const SignIn = () => {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Save the role in localStorage for persistence
-    localStorage.setItem("role", role);
-    localStorage.setItem("username", username);
-
-    // Redirect based on the role
-    if (role === "buyer") {
-      navigate("/Cart");
-    } else {
-      navigate("/Sell");
+    // Sending POST request to register user
+    try {
+      const response = await fetch("http://127.0.0.1:5555/users", {
+        method: "POST",
+        body: JSON.stringify({ username, email, password, role }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // Assuming user registration was successful
+        // localStorage.setItem("role", role);
+        // localStorage.setItem("username", username);
+        // Redirect based on role
+        if (role === "buyer") {
+          navigate("/Cart");
+        } else {
+          navigate("/Sell");
+        }
+      } else {
+        alert("Registration failed");
+      }
+    } catch (error) {
+      alert("An error occurred during registration");
     }
   };
 

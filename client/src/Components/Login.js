@@ -6,10 +6,26 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("username", username); 
-    navigate("/Home");
+    try {
+      const response = await fetch("http://127.0.0.1:5555/login", {
+        method: "POST",
+        body: JSON.stringify({ username, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Ensures cookies are sent
+      });
+
+      if (response.ok) {
+        navigate("/sell");
+      } else {
+        alert("Login failed");
+      }
+    } catch (error) {
+      alert("An error occurred");
+    }
   };
 
   return (

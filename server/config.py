@@ -7,11 +7,15 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
-
+from functools import wraps
+from flask import request, jsonify
+import jwt 
 
 
 # Local imports
 
+
+SECRET_KEY = 'zippy'
 # Instantiate app, set attributes
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -30,4 +34,36 @@ db.init_app(app)
 api = Api(app)
 
 # Instantiate CORS
-CORS(app)
+CORS(app, resources={r"/items": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "PATCH", "OPTIONS"]}})
+
+
+# Decorator to check if token is present and valid
+def token_required(f):
+    from models import User
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]  # Get token from 'Bearer token' format
+
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 403
+        
+        try:
+            # Decode the token
+            data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+            current_user = User.query.filter_by(id=data['user_id']).first()
+            if not current_user:
+                return jsonify({'message': 'User not found!'}), 404
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 403
+        except jwt.InvalidTokenError:
+            return jsonify({'message': 'Invalid token!'}), 403
+        except Exception as e:
+            # Log the exception for debugging (optional)
+            print(f"Error decoding token: {e}")
+            return jsonify({'message': 'Token is invalid!'}), 403
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated_function

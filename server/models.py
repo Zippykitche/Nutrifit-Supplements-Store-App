@@ -1,8 +1,7 @@
+from config import db
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 from datetime import datetime
-
-from config import db
 
 # User model
 class User(db.Model, SerializerMixin):
@@ -17,8 +16,8 @@ class User(db.Model, SerializerMixin):
     role = db.Column(db.String(20), nullable=False, default='buyer')  # 'buyer', 'seller', or 'admin'
 
     # Relationships
-    cart_items = db.relationship('CartItem', backref='user', lazy=True)
-    purchases = db.relationship('Purchase', backref='user', lazy=True)
+    cart_items = db.relationship('CartItem', backref='user', lazy=True, cascade='all, delete', passive_deletes=True)
+    purchases = db.relationship('Purchase', backref='user', lazy=True, cascade='all, delete', passive_deletes=True)
     items = db.relationship('Item', backref='seller', lazy=True)  # Seller relationship
 
     # Association proxies
@@ -67,8 +66,8 @@ class Item(db.Model, SerializerMixin):
     itemCategory_id = db.Column(db.Integer, db.ForeignKey('item_categories.id'), nullable=True)
 
     # Relationships
-    cart_items = db.relationship('CartItem', backref='item', lazy=True)
-    purchases = db.relationship('Purchase', backref='item', lazy=True)
+    cart_items = db.relationship('CartItem', backref='item', lazy=True, cascade='all, delete', passive_deletes=True)
+    purchases = db.relationship('Purchase', backref='item', lazy=True, cascade='all, delete', passive_deletes=True)
 
     buyers = association_proxy('purchases', 'user')  # Access users who purchased the item
 
