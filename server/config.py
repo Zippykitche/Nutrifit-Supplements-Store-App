@@ -34,7 +34,7 @@ db.init_app(app)
 api = Api(app)
 
 # Instantiate CORS
-CORS(app, resources={r"/items": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "PATCH", "OPTIONS"]}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "PATCH", "PUT", "OPTIONS"], "supports_credentials": True}})
 
 
 # Decorator to check if token is present and valid

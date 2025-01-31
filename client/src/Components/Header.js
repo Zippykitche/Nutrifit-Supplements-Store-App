@@ -40,8 +40,8 @@ function Header({cartCount}) {
           )}
         </div>
 
-        <Link to="/Sell">Sell</Link>
-        <Link to="/Cart" className="cart-icon-link">
+        <Link to="/sell">Sell</Link>
+        <Link to="/cart" className="cart-icon-link">
           <img src="/images/cart.png" alt="Cart" className="cart-icon" />
           {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
         </Link>

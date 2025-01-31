@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SignIn = () => {
+const SignIn = ({setUserId, setUserRole}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("buyer");
@@ -19,13 +19,14 @@ const SignIn = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        mode : "cors",
+        credentials: "include"
       });
       const data = await response.json();
       if (response.ok) {
-        // Assuming user registration was successful
-        // localStorage.setItem("role", role);
-        // localStorage.setItem("username", username);
-        // Redirect based on role
+        setUserId(data.user.id);
+        setUserRole(data.user.role);
+  
         if (role === "buyer") {
           navigate("/Cart");
         } else {

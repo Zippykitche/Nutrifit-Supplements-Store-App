@@ -1,66 +1,85 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './Components/Home';
-import Cart from './Components/Cart';
-import Sell from './Components/Sell';
-import Header from './Components/Header';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import Header from "./Components/Header";
+import Home from "./Components/Home";
+import Cart from "./Components/Cart";
+import Sell from "./Components/Sell";
 import SignIn from "./Components/SignIn";
 import Login from "./Components/Login";
-import { Navigate } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 import './App.css';
 
 function App() {
   const [cart, setCart] = useState([]);
   const [saleItems, setSaleItems] = useState([]);
-  const [showNotification, setShowNotification] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [userRole, setUserRole] = useState(); 
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Fetch data on component mount
   useEffect(() => {
-    // Fetch sale items from backend
-    fetch('http://127.0.0.1:5555/items', {
-      method: 'GET',
+   
+    fetch("http://127.0.0.1:5555/login", {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json'
-      },
-      mode: 'cors' // Explicitly set to 'cors'
+          "Content-Type": "application/json",
+        },
+      mode: "cors",
+      credentials: "include"
     })
-    .then(response => response.json())
-    .then(data => setSaleItems(data))
-    .catch(error => console.error('Error:', error));
-    
+      .then(response => response.json())
+      .then((data) => {
+        setUserId(data.id);
+        setUserRole(data.role);
+      })
+      .catch((error) => {
+        console.error("Error fetching user:", error);
+        setUserId(null);
+        setUserRole(null);
+      });
+  }, []);
 
-    // Fetch cart items from backend
+  useEffect(() => {
     fetch('http://127.0.0.1:5555/cart', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       },
-      mode: 'cors' // Explicitly set to 'cors'
+      mode: 'cors' 
     })
     .then(response => response.json())
     .then(data => setCart(data))
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error:', error) );
+  }, [] )
 
-    // Check for logged-in user
-    const loggedInUser = JSON.parse(localStorage.getItem('user'));
-    if (loggedInUser) {
-      setUserId(loggedInUser.id);
-    }
+  useEffect(() => {
+    fetch('http://127.0.0.1:5555/items', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors' 
+    })
+    .then(response => response.json())
+    .then(data => setSaleItems(data))
+    .catch(error => console.error('Error:', error));
   }, []);
 
-  // Update backend when cart or sale items change
   useEffect(() => {
     const updateCart = async () => {
       for (const item of cart) {
         await fetch(`http://127.0.0.1:5555/cart/${item.id}`, {
-          method: 'PATCH',
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(item),
         }).catch(err => console.error("Error updating cart:", err));
       }
     };
-  
+
+    if (cart.length > 0) updateCart();
+  }, [cart]);
+
+  useEffect(() => {
     const updateSaleItems = async () => {
       for (const item of saleItems) {
         await fetch(`http://127.0.0.1:5555/items/${item.id}`, {
@@ -70,49 +89,36 @@ function App() {
         }).catch(err => console.error("Error updating items:", err));
       }
     };
-  
-    if (cart.length > 0) updateCart();
-    if (saleItems.length > 0) updateSaleItems();
-  }, [cart, saleItems]);
-  
 
-  // Add new item for sale
-  const addItemForSale = (newItem) => {
-    setSaleItems((prevItems) => [...prevItems, newItem]);
+    if (saleItems.length > 0) updateSaleItems();
+  }, [saleItems]);
+
+  const addItemForSale = async (newItem) => {
+    await fetch('http://127.0.0.1:5555/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newItem),
+    })
+      .then(response => response.json())
+      .then(data => setSaleItems((prevItems) => [...prevItems, data]))
+      .catch(error => console.error('Error adding item for sale:', error));
   };
 
-  // Add item to cart
   const addToCart = (item) => {
     setCart((prevCart) => [...prevCart, item]);
-    setShowNotification(true);
-    setTimeout(() => {
-      setShowNotification(false);
-    }, 2000);
   };
 
   return (
-    <Router>
+    <>
       <Header cartCount={cart.length} />
-      <div className={`notification ${showNotification ? "show" : ""}`}>
-        Supplement added to cart!
-      </div>
       <Routes>
-        <Route path="/" element={<Home items={saleItems} addToCart={addToCart} />} />
-        <Route path="/cart" element={<Cart cartItems={cart} />} />
-        <Route
-          path="/sell"
-          element={
-            userId ? (
-              <Sell userId={userId} categoryId={1} items={saleItems} setItems={addItemForSale} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+        <Route path="/" element={<Home items={saleItems} />} />
+        <Route path="/cart" element={userRole === "buyer" ? <Cart cartItems={cart} /> : <Navigate to="/" />} />
+        <Route path="/sell" element={userRole === "seller" ? <Sell items={saleItems} setItems={setSaleItems} userId={userId} /> : <Navigate to="/" />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login setUserId={setUserId} setUserRole={setUserRole} />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 

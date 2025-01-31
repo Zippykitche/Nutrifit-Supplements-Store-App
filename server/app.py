@@ -21,6 +21,8 @@ from models import User, Item, ItemCategory, CartItem, Purchase
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # For cross-origin cookies
+app.config['SESSION_COOKIE_SECURE'] = False 
 app.config['SECRET_KEY'] = 'zippy' 
 
 
@@ -39,6 +41,7 @@ def index():
     return response
 
 class Login(Resource):
+    
     def post(self):
         data = request.get_json()
         username = data['username']
@@ -47,10 +50,13 @@ class Login(Resource):
         user = User.query.filter_by(username=username).first()
 
         if not user or not check_password_hash(user.password, password):
-            return jsonify({"error": "Invalid username or password"}), 401
+            response = make_response({"error": "Invalid username or password"}), 401
+            return response
 
         # Store user ID in session to keep track of authentication
         session["user_id"] = user.id
+        session["user_role"] = user.role
+        print("Session after login:", session) 
 
         response_data = {
             "message": "Login successful",
@@ -58,6 +64,17 @@ class Login(Resource):
         }
 
         response = make_response(response_data, 200)
+        return response
+    
+    def get(self):
+        user_id = session.get("user_id")
+        user_role = session.get("user_role")
+
+        if not user_id:
+            response = make_response({"error": "Not logged in"}, 401)
+            return response
+
+        response = make_response({"id": user_id, "role": user_role}, 200)
         return response
 
 class Logout(Resource):
