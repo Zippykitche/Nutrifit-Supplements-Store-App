@@ -20,7 +20,6 @@ function Sell({ items = [], setItems, userId }) {
     e.preventDefault();
 
     const newItem = {
-      id: Date.now(),
       name: itemName,
       description: itemDescription,
       price: itemPrice,
@@ -33,6 +32,7 @@ function Sell({ items = [], setItems, userId }) {
       headers: {
         "Content-Type": "application/json",
       },
+      mode: "cors",
       body: JSON.stringify(newItem),
     })
       .then((response) => response.json())

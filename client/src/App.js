@@ -39,6 +39,13 @@ function App() {
       });
   }, []);
 
+  // const handleLogout = () => {
+  //   setUserId(null);
+  //   setUserRole(null);
+  //   setCart([]); 
+  // };
+  
+
   useEffect(() => {
     fetch('http://127.0.0.1:5555/cart', {
       method: 'GET',
@@ -71,6 +78,7 @@ function App() {
         await fetch(`http://127.0.0.1:5555/cart/${item.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
+          mode: "cors",
           body: JSON.stringify(item),
         }).catch(err => console.error("Error updating cart:", err));
       }
@@ -85,6 +93,7 @@ function App() {
         await fetch(`http://127.0.0.1:5555/items/${item.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
+          mode: "cors",
           body: JSON.stringify(item),
         }).catch(err => console.error("Error updating items:", err));
       }
@@ -98,6 +107,7 @@ function App() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newItem),
+      mode: "cors"
     })
       .then(response => response.json())
       .then(data => setSaleItems((prevItems) => [...prevItems, data]))
@@ -113,8 +123,28 @@ function App() {
       <Header cartCount={cart.length} />
       <Routes>
         <Route path="/" element={<Home items={saleItems} />} />
-        <Route path="/cart" element={userRole === "buyer" ? <Cart cartItems={cart} /> : <Navigate to="/" />} />
-        <Route path="/sell" element={userRole === "seller" ? <Sell items={saleItems} setItems={setSaleItems} userId={userId} /> : <Navigate to="/" />} />
+        <Route
+    path="/cart"
+    element={
+      userId ? (
+        userRole === "buyer" ? <Cart cartItems={cart} /> : <Navigate to="/" />
+      ) : (
+        <Navigate to="/login" />
+      )
+    }
+  />
+  
+  <Route
+    path="/sell"
+    element={
+      userId ? (
+        userRole === "seller" ? <Sell items={saleItems} setItems={setSaleItems} userId={userId} /> : <Navigate to="/" />
+      ) : (
+        <Navigate to="/login" />
+      )
+    }
+  />
+  
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<Login setUserId={setUserId} setUserRole={setUserRole} />} />
       </Routes>

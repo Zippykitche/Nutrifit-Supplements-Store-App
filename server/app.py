@@ -153,7 +153,8 @@ class Items(Resource):
             200
         )
         return response
-
+    
+    @cross_origin()
     def post(self):
         data = request.get_json()
         new_item = Item(
