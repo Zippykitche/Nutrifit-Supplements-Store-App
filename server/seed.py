@@ -24,9 +24,9 @@ if __name__ == '__main__':
         # Seed code goes here!
 
         # Clear existing data
+        db.session.query(Item).delete()
         db.session.query(CartItem).delete()
         db.session.query(Purchase).delete()
-        db.session.query(Item).delete()
         db.session.query(ItemCategory).delete()
         db.session.query(User).delete()
         db.session.commit()

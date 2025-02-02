@@ -1,7 +1,7 @@
 # Standard library imports
 
 # Remote library imports
-from flask import Flask
+from flask import Flask, make_response
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -34,7 +34,7 @@ db.init_app(app)
 api = Api(app)
 
 # Instantiate CORS
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "PATCH", "PUT", "OPTIONS"], "supports_credentials": True}})
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 
 # Decorator to check if token is present and valid

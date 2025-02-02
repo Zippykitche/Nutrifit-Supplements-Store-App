@@ -21,9 +21,11 @@ from models import User, Item, ItemCategory, CartItem, Purchase
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # For cross-origin cookies
-app.config['SESSION_COOKIE_SECURE'] = False 
-app.config['SECRET_KEY'] = 'zippy' 
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # For cross-origin cookies
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SECRET_KEY'] = 'zippy'
+app.config['SESSION_COOKIE_HTTPONLY'] = False
+ 
 
 
 Session(app)
@@ -48,12 +50,19 @@ class Login(Resource):
         password = data['password']
 
         user = User.query.filter_by(username=username).first()
+        
 
         if not user or not check_password_hash(user.password, password):
-            response = make_response({"error": "Invalid username or password"}), 401
+            message = {"error": "Invalid username or password"}
+            response = make_response(
+                message,
+                401
+
+            )
             return response
 
         # Store user ID in session to keep track of authentication
+        
         session["user_id"] = user.id
         session["user_role"] = user.role
         print("Session after login:", session) 
@@ -62,8 +71,11 @@ class Login(Resource):
             "message": "Login successful",
             "user": user.to_dict()
         }
+        response = make_response(
+            response_data,
+            200
+        )
 
-        response = make_response(response_data, 200)
         return response
     
     def get(self):
@@ -71,8 +83,10 @@ class Login(Resource):
         user_role = session.get("user_role")
 
         if not user_id:
-            response = make_response({"error": "Not logged in"}, 401)
-            return response
+            if "guest_id" not in session:
+                session["guest_id"] = f"guest_{session.sid}"  
+            user_id = session["guest_id"]
+            user_role = "guest"
 
         response = make_response({"id": user_id, "role": user_role}, 200)
         return response
@@ -80,11 +94,14 @@ class Login(Resource):
 class Logout(Resource):
     def post(self):
         session.pop("user_id", None)  # Remove user from session
-        return jsonify({"message": "Logged out successfully"}), 200
+        response = make_response(jsonify({"message": "Logged out successfully"}), 200)
+        
+        response.delete_cookie('session')
+        return response
 
 # User Resource
 class Users(Resource):
-    
+    @cross_origin( supports_credentials=True)
     def get(self):
         users = User.query.all()
         users_to_dict = [user.to_dict() for user in users]
@@ -93,7 +110,8 @@ class Users(Resource):
             200
         )
         return response
-
+    
+    @cross_origin(supports_credentials=True)
     def post(self):
         data = request.get_json()
 
@@ -113,10 +131,7 @@ class Users(Resource):
         db.session.add(new_user)
         db.session.commit()
 
-        response = make_response(
-            new_user.to_dict(),
-            201
-        )
+        response = (jsonify(new_user.to_dict()), 201)
         return response
     
 class UserbyId(Resource):
@@ -127,9 +142,18 @@ class UserbyId(Resource):
             200
         )
         return response
+    def delete(self, id):
+        user = User.query.filter(User.id==id).first()
 
+        db.session.delete(user)
+        db.session.commit()
 
-
+        response_dict = {"message": "user successfully deleted"}
+        response = make_response(
+            response_dict,
+            200
+        )
+        return response
 
 # Item Categories Resource
 class ItemCategories(Resource):
@@ -161,7 +185,7 @@ class Items(Resource):
             name=data['name'],
             description=data['description'],
             price=float(data["price"]),
-            stock=int(data["stock"]),
+            stock=data.get('stock', 10),
             image=data['image'],
             user_id=int(data["user_id"]),
             itemCategory_id=int(data["itemCategory_id"])
@@ -175,20 +199,6 @@ class Items(Resource):
         )
         return response
     
-    @cross_origin() 
-    def patch(self):
-        item = Item.query.filter(Item.id==id).first()
-        for attr in request.form:
-            setattr(item, attr, request.form[attr])
-
-        db.session.add(item)
-        db.session.commit()
-
-        response_dict = item.to_dict()
-        response = make_response(
-            response_dict,
-            200
-        )
     
 class ItemsbyId(Resource):
     @cross_origin()
@@ -236,18 +246,39 @@ class ItemsbyId(Resource):
 class CartItems(Resource):
     def get(self):
         cart_items = CartItem.query.all()
-        cart_item_to_dict = [cart_item.to_dict() for cart_item in cart_items]
-        response = make_response(
-            cart_item_to_dict,
-            200
-        )
-        return response
+        cart_with_details = []
+        for cart_item in cart_items:
+            item = Item.query.get(cart_item.item_id)  
+            if item:
+                cart_with_details.append({
+                    "id": cart_item.id,
+                    "name": item.name,
+                    "description": item.description,
+                    "image": item.image,
+                    "price": item.price,
+                    "quantity": cart_item.quantity,
+                    "item_id": cart_item.item_id,
+                    "user_id": cart_item.user_id
+                })
 
+        return make_response(jsonify(cart_with_details), 200)
+    
     def post(self):
         data = request.get_json()
+        user_id = session.get("user_id")
+
+        if not user_id:
+            if "guest_id" not in session:
+                session["guest_id"] = f"guest_{session.sid}"  
+            user_id = session["guest_id"]
+
+  
+        if 'item_id' not in data:
+            return make_response({'message': 'item_id is required'}, 400)
+           
         new_cart_item = CartItem(
-            quantity=data['quantity'],
-            user_id=int(data['user_id']),
+            quantity=data.get('quantity', 1),
+            user_id=user_id,
             item_id=int(data['item_id'])
         )
         db.session.add(new_cart_item)
@@ -259,37 +290,70 @@ class CartItems(Resource):
         )
         return response
     
-    def patch(self, id):
-        item = Item.query.filter(Item.id==id).first()
-        for attr in request.form:
-            setattr(item, attr, request.form[attr])
+    # def patch(self, id):
+    #     item = Item.query.filter(Item.id==id).first()
+    #     for attr in request.form:
+    #         setattr(item, attr, request.form[attr])
 
-        db.session.add(item)
-        db.session.commit()
+    #     db.session.add(item)
+    #     db.session.commit()
 
-        response_dict = item.to_dict()
-        response = make_response(
-            response_dict,
-            200
-        )
-    
+    #     response_dict = item.to_dict()
+    #     response = make_response(
+    #         response_dict,
+    #         200
+    #     )
+     
 class CartItemsbyId(Resource):
-    def put(self, id):
+    def get(self, id):
+        print("Session:", session)
+        user_id = session.get("user_id")
+        if "user_id" not in session:
+            return make_response({"error": "Not authenticated"}, 401)
+        
+        user_id = session["user_id"]
+        cart_items = CartItem.query.filter_by(user_id=user_id).all()
+        
+        return make_response({"cart_items": [item.to_dict() for item in cart_items]}, 200)
+    
+    def post(self, id):
         data = request.get_json()
-        cart_item = CartItem.query.filter(CartItem.id==id).first()
-        for attr in request.form:
-            setattr(cart_item, attr, request.form[attr])
+        user_id = session.get("user_id")
 
-        db.session.add(cart_item)
+        if not user_id:
+            if "guest_id" not in session:
+                session["guest_id"] = f"guest_{session.sid}"  
+            user_id = session["guest_id"]
+
+        if 'item_id' not in data:
+            return make_response({'message': 'item_id is required'}, 400)
+           
+        new_cart_item = CartItem(
+            quantity=data.get('quantity', 1),
+            user_id=user_id,
+            item_id=int(data['item_id'])
+        )
+        db.session.add(new_cart_item)
         db.session.commit()
 
-        response_dict = cart_item.to_dict()
+        response = make_response(
+            new_cart_item.to_dict(),
+            201
+        )
+        return response  
+    def delete(self, id):
+        cart_item = CartItem.query.filter(CartItem.id==id).first()
+
+        db.session.delete(cart_item)
+        db.session.commit()
+
+        response_dict = {"message": "record successfully deleted"}
         response = make_response(
             response_dict,
             200
         )
 
-        return response    
+        return response  
 
 # Purchases Resource
 class Purchases(Resource):
@@ -334,6 +398,7 @@ api.add_resource(Purchases, '/purchases')
 api.add_resource(CartItemsbyId, '/cart/<int:id>')
 api.add_resource(Login, "/login")  
 api.add_resource(Logout, "/logout")
+
 
 
 if __name__ == '__main__':
