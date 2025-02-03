@@ -3,6 +3,7 @@
 # Standard library imports
 
 # Remote library imports
+
 from flask import request, jsonify, make_response, session
 from flask_restful import Resource
 from datetime import datetime
@@ -423,6 +424,8 @@ class ItemsByUser(Resource):
         purchases = Purchase.query.filter_by(user_id=user.id).all()
         items = [purchase.item for purchase in purchases]
         return make_response([item.to_dict() for item in items], 200)
+    
+
 
 
 
@@ -445,4 +448,4 @@ api.add_resource(ItemsByUser, '/purchases/items/<int:user_id>')
 
 
 if __name__ == '__main__':
-    app.run(port=5555, debug=True)
+    app.run(host="0.0.0.0", port=5555, debug=True)
