@@ -368,13 +368,35 @@ class Purchases(Resource):
 
     def post(self):
         data = request.get_json()
+        user_id = data.get('user_id')
+        item_id = data.get('item_id')
+        quantity = data.get('quantity')
+        purchase_date = data.get('purchase_date')
+
+        item = Item.query.get(item_id)
+        user = User.query.get(user_id)
+
+        if not item or not user:
+            return jsonify({'error': 'Item or User not found'}), 404
+        total_price = item.price * quantity
+
+        if purchase_date:
+            try:
+                purchase_date = datetime.strptime(purchase_date, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                return jsonify({'error': 'Invalid date format, expected "YYYY-MM-DD HH:MM:SS"'}), 400
+        else:
+            purchase_date = datetime.now()  
+        
         new_purchase = Purchase(
-            quantity=int(data['quantity']),
-            total_price=int(data['total_price']),
-            purchase_date=datetime.strptime(data["purchase_date"], "%Y-%m-%d %H:%M:%S"),
-            user_id=int(data['user_id']),
-            item_id=int(data['item_id'])
+            quantity=quantity,
+            total_price=total_price,
+            purchase_date=purchase_date,
+            user_id=item.id,
+            item_id=user.id
         )
+
+
         db.session.add(new_purchase)
         db.session.commit()
     
@@ -383,7 +405,24 @@ class Purchases(Resource):
             201
         )
         return response
-
+class UsersbyItem(Resource):
+    def get(self, item_id):
+        purchases = Purchase.query.filter_by(item_id=item_id).all()
+        users = [purchase.user for purchase in purchases]
+        users_to_dict= [user.to_dict() for user in users]
+        response = make_response(
+            users_to_dict,
+            200
+        )
+        return response
+class ItemsByUser(Resource):
+    def get(self, user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return {'error': 'User not found'}, 404
+        purchases = Purchase.query.filter_by(user_id=user.id).all()
+        items = [purchase.item for purchase in purchases]
+        return make_response([item.to_dict() for item in items], 200)
 
 
 
@@ -395,9 +434,13 @@ api.add_resource(Items, '/items')
 api.add_resource(ItemsbyId, '/items/<int:id>')
 api.add_resource(CartItems, '/cart')
 api.add_resource(Purchases, '/purchases')
-api.add_resource(CartItemsbyId, '/cart/<int:id>')
-api.add_resource(Login, "/login")  
-api.add_resource(Logout, "/logout")
+api.add_resource(CartItemsbyId, '/cart/<int:id>') #cartitemsbyuser
+api.add_resource(Login, '/login')  
+api.add_resource(Logout, '/logout')
+api.add_resource(UsersbyItem, '/item/<int:item_id>/purchasers')
+api.add_resource(ItemsByUser, '/purchases/items/<int:user_id>')
+
+
 
 
 

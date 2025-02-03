@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SignIn = ({setUserId, setUserRole}) => {
+const SignIn = () => {
+  const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("buyer");
+  const [role, setUserRole] = useState("");
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
@@ -13,7 +14,7 @@ const SignIn = ({setUserId, setUserRole}) => {
 
     // Sending POST request to register user
     try {
-      const response = await fetch("http://127.0.0.1:5555/users", {
+      const response = await fetch("http://localhost:5555/users", {
         method: "POST",
         body: JSON.stringify({ username, email, password, role }),
         headers: {
@@ -24,22 +25,17 @@ const SignIn = ({setUserId, setUserRole}) => {
       });
       const data = await response.json();
       if (response.ok) {
-        setUserId(data.user.id);
-        setUserRole(data.user.role);
-  
-        if (role === "buyer") {
-          navigate("/Cart");
-        } else {
-          navigate("/Sell");
-        }
+        setUserId(data.id);
+        setUserRole(data.role);
+        navigate("/login");
       } else {
         alert("Registration failed");
       }
     } catch (error) {
       alert("An error occurred during registration");
     }
+  
   };
-
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
@@ -85,7 +81,7 @@ const SignIn = ({setUserId, setUserRole}) => {
                 <select
                   className="form-select"
                   value={role}
-                  onChange={(e) => setRole(e.target.value)}
+                  onChange={(e) => setUserRole(e.target.value)}
                 >
                   <option value="buyer">Buyer</option>
                   <option value="seller">Seller</option>

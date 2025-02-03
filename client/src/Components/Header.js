@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from "react";
 
-function Header({cartCount}) {
+function Header({cartCount, handleLogout}) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -28,14 +28,18 @@ function Header({cartCount}) {
     <header className="header-container">
       <div className="logo">NutriFit</div>
       <nav className="nav-links">
-      <Link to="/" className="nav-item">Home</Link>
+        <Link to="/" className="nav-item">Home</Link>
+
         <div className="account-container" onClick={toggleDropdown}>
-        <i className="fa fa-user account-icon" />
-          Account 
+          <i className="fa fa-user account-icon" />
+          Account
           {showDropdown && (
-          <div ref={dropdownRef} className={`account-dropdown ${showDropdown ? 'show' : ''}`}>
+            <div ref={dropdownRef} className="account-dropdown show">
               <Link to="/signin" className="dropdown-item">Sign In</Link>
               <Link to="/login" className="dropdown-item">My Account</Link>
+              <button className="dropdown-item logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
             </div>
           )}
         </div>
@@ -50,5 +54,4 @@ function Header({cartCount}) {
   );
 }
 
-  export default Header;
-  
+export default Header;

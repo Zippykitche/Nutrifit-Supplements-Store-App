@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SupplementCard from "./SupplementCard";
 
@@ -7,13 +7,19 @@ function Sell({ items = [], setItems, userId }) {
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemImage, setItemImage] = useState("");
+  const [itemCategory, setItemCategory] = useState("");
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
-
-  // Redirect to login if user is not logged in
-  if (!userId) {
-    navigate("/login");
-    return null; // Prevent rendering if not logged in
-  }
+  
+  const sellerItems = items.filter((item) => item.user_id === userId);
+//fetch category
+  useEffect(() => {
+    fetch("http://127.0.0.1:5555/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data))
+      .catch((error) => console.error("Error fetching categories:", error));
+  }, []);
+  
 
   // Handle item submission
   const handleSubmit = (e) => {
@@ -24,7 +30,9 @@ function Sell({ items = [], setItems, userId }) {
       description: itemDescription,
       price: itemPrice,
       image: itemImage,
-      sellerId: userId, // Associate item with the logged-in seller
+      user_id: userId, 
+      itemCategory_id: parseInt(itemCategory),
+      stock: 10
     };
 
     fetch("http://127.0.0.1:5555/items", {
@@ -32,10 +40,14 @@ function Sell({ items = [], setItems, userId }) {
       headers: {
         "Content-Type": "application/json",
       },
-      mode: "cors",
-      body: JSON.stringify(newItem),
+      body: JSON.stringify(newItem),  
     })
-      .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
       .then((data) => {
         setItems([...items, data]);
       })
@@ -47,7 +59,22 @@ function Sell({ items = [], setItems, userId }) {
     setItemDescription("");
     setItemPrice("");
     setItemImage("");
+    setItemCategory("");
   };
+// delete item
+  const handleDelete = (itemId) => {
+    fetch(`http://127.0.0.1:5555/items/${itemId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to delete item");
+        }
+        setItems(items.filter((item) => item.id !== itemId));
+      })
+      .catch((error) => console.error("Error deleting item:", error));
+  };
+  
 
   return (
     <div className="container mt-5">
@@ -91,16 +118,31 @@ function Sell({ items = [], setItems, userId }) {
             onChange={(e) => setItemImage(e.target.value)}
           />
         </div>
+        <div className="mb-3">
+          <select
+            className="form-control"
+            value={itemCategory}
+            onChange={(e) => setItemCategory(e.target.value)}
+            required
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <button type="submit" className="btn btn-primary">
           Post Item
         </button>
       </form>
 
       <div className="mt-4 row">
-        {items.length === 0 ? (
+        {sellerItems.length === 0 ? (
           <p>No items listed for sale yet!</p>
         ) : (
-          items.map((item) => (
+          sellerItems.map((item) => (
             <div key={item.id} className="col-md-4 mb-4">
               <SupplementCard
                 name={item.name}
@@ -109,6 +151,9 @@ function Sell({ items = [], setItems, userId }) {
                 price={item.price}
                 showCartIcon={false}
               />
+               <button className="btn btn-danger mt-2" onClick={() => handleDelete(item.id)}>
+                Remove
+              </button>
             </div>
           ))
         )}

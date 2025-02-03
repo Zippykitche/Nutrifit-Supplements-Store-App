@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import SupplementCard from "./SupplementCard";
 
-function Home({ items, addToCart }) {
+function Home({ items=[], addToCart }) {
   const [supplements, setSupplements] = useState([]);
-  const url = "http://127.0.0.1:5555";
-
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch(url)
+    fetch("http://127.0.0.1:5555")
       .then((response) => response.json())
       .then((data) => setSupplements(data))
       .catch((error) => console.error('Error fetching supplements:', error));
-  }, [url]);
+  }, []);
 
   const allSupplements = [...supplements, ...items];
 

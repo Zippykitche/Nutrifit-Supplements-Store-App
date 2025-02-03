@@ -26,17 +26,9 @@ const Login = ({ setUserId, setUserRole }) => {
         setUserId(data.user.id);
         setUserRole(data.user.role);
         setLoginMessage("You've successfully logged in!");
-
-        if (data.user.role === "buyer") {
-          navigate("/cart");
-        } else if (data.user.role === "seller") {
-          navigate("/sell");
-        }
-        
-        
-      } 
-      else {
-        alert("Login failed");
+        navigate("/");
+      } else {
+        alert("Invalid username or password");
       }
     } catch (error) {
       alert("An error occurred. Please try again.");
