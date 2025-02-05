@@ -15,7 +15,6 @@ function Cart({ cart, setCart }) {
     })
       .then(response => response.json())
       .then(data => {
-        console.log("Cart Data:", data);
         setCart(Array.isArray(data) ? data : []); // Ensure it's always an array
       })
       .catch(error => {

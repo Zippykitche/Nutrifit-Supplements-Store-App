@@ -50,19 +50,6 @@ function App() {
     setCart([]);
   };
 
-  //cart
-  useEffect(() => {
-    fetch('http://127.0.0.1:5555/cart', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      mode: 'cors' 
-    })
-    .then(response => response.json())
-    .then(data => setCart(data))
-    .catch(error => console.error('Error:', error) );
-  }, [] )
 
   // Function to add an item to the cart
   const addToCart = (item) => {  
@@ -75,7 +62,7 @@ function App() {
       return;
     }
 
-    fetch(`http://127.0.0.1:5555/cart/${userId}`, {
+    fetch("http://127.0.0.1:5555/cart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

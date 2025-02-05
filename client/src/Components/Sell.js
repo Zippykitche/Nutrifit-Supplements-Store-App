@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import SupplementCard from "./SupplementCard";
 
 function Sell({ items = [], setItems, userId }) {
@@ -9,7 +8,7 @@ function Sell({ items = [], setItems, userId }) {
   const [itemImage, setItemImage] = useState("");
   const [itemCategory, setItemCategory] = useState("");
   const [categories, setCategories] = useState([]);
-  const navigate = useNavigate();
+  const [editingItem, setEditingItem] = useState(null);
   
   const sellerItems = items.filter((item) => item.user_id === userId);
 //fetch category
@@ -74,12 +73,59 @@ function Sell({ items = [], setItems, userId }) {
       })
       .catch((error) => console.error("Error deleting item:", error));
   };
+
+  // Handle edit button click
+  const handleEditClick = (item) => {
+    setEditingItem(item);
+    setItemName(item.name);
+    setItemDescription(item.description);
+    setItemPrice(item.price);
+    setItemImage(item.image);
+    setItemCategory(item.itemCategory_id.toString());
+  };
+
+  // Handle update item
+  const handleUpdate = (e) => {
+    e.preventDefault();
+
+    if (!editingItem) return;
+
+    const updatedItem = {
+      name: itemName,
+      description: itemDescription,
+      price: itemPrice,
+      image: itemImage,
+      itemCategory_id: parseInt(itemCategory),
+    };
+
+    fetch(`http://127.0.0.1:5555/items/${editingItem.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedItem),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setItems(items.map((item) => (item.id === data.id ? data : item)));
+        resetForm();
+      })
+      .catch((error) => console.error("Error updating item:", error));
+  };
+
+  // Reset form fields
+  const resetForm = () => {
+    setItemName("");
+    setItemDescription("");
+    setItemPrice("");
+    setItemImage("");
+    setItemCategory("");
+    setEditingItem(null);
+  };
   
 
   return (
     <div className="container mt-5">
-      <p className="mb-4">Fill this Form to post a supplement:</p>
-      <form onSubmit={handleSubmit} className="bg-light p-4 rounded shadow-sm">
+      <p className="mb-4">{editingItem ? "Edit Supplement" : "Post a Supplement"}</p>
+      <form onSubmit={editingItem ? handleUpdate : handleSubmit} className="bg-light p-4 rounded shadow-sm">
         <div className="mb-3">
           <input
             type="text"
@@ -134,8 +180,13 @@ function Sell({ items = [], setItems, userId }) {
           </select>
         </div>
         <button type="submit" className="btn btn-primary">
-          Post Item
+          {editingItem ? "Update Item" : "Post Item"}
         </button>
+        {editingItem && (
+          <button type="button" className="btn btn-secondary ms-2" onClick={resetForm}>
+            Cancel
+          </button>
+        )}
       </form>
 
       <div className="mt-4 row">
@@ -151,7 +202,10 @@ function Sell({ items = [], setItems, userId }) {
                 price={item.price}
                 showCartIcon={false}
               />
-               <button className="btn btn-danger mt-2" onClick={() => handleDelete(item.id)}>
+              <button className="btn btn-warning mt-2 me-2" onClick={() => handleEditClick(item)}>
+                Edit
+              </button>
+              <button className="btn btn-danger mt-2" onClick={() => handleDelete(item.id)}>
                 Remove
               </button>
             </div>
