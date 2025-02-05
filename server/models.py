@@ -7,7 +7,7 @@ from datetime import datetime
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
-    serialize_rules = ('-cart_items.user', '-purchases.user', '-items.seller', '-cart_items.item.cart_items', '-purchases.item.purchases')
+    serialize_rules = ('-cart_items.user', '-purchases.user', '-items.user', '-cart_items.item.cart_items', '-purchases.item.purchases')
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
@@ -18,7 +18,7 @@ class User(db.Model, SerializerMixin):
     # Relationships
     cart_items = db.relationship('CartItem', backref='user', lazy=True, cascade='all, delete', passive_deletes=True)
     purchases = db.relationship('Purchase', backref='user', lazy=True, cascade='all, delete', passive_deletes=True)
-    items = db.relationship('Item', backref='seller', lazy=True)  # Seller relationship
+    items = db.relationship('Item', backref='user', lazy=True)  # Seller relationship
 
     # Association proxies
     cart_items_details = association_proxy('cart_items', 'item')  # Access items in the cart directly
@@ -70,6 +70,7 @@ class Item(db.Model, SerializerMixin):
     purchases = db.relationship('Purchase', backref='item', lazy=True, cascade='all, delete', passive_deletes=True)
 
     buyers = association_proxy('purchases', 'user')  # Access users who purchased the item
+    # seller = association_proxy('seller', 'username') #access users who sell an item
 
     def __repr__(self):
         return f'<Item {self.name}>'

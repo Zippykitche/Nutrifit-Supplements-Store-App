@@ -156,6 +156,7 @@ class UserbyId(Resource):
         )
         return response
 
+
 # Item Categories Resource
 class ItemCategories(Resource):
     def get(self):
@@ -242,6 +243,26 @@ class ItemsbyId(Resource):
         )
 
         return response
+    
+class ItemsbyUser(Resource):
+    def get(self, user_id):
+        user = User.query.filter_by(id=user_id).first()
+        items = user.items
+        item_with_details = []
+        for item in items:
+             if item:
+                item_with_details.append({
+                    "id": item.id,
+                    "name": item.name,
+                    "description": item.description,
+                    "image": item.image,
+                    "price": item.price,
+                    "stock": item.stock,
+                    "user_id": item.user_id
+                })
+    
+        return make_response( item_with_details, 200)
+
 
 # Cart Items Resource
 class CartItems(Resource):
@@ -304,19 +325,52 @@ class CartItems(Resource):
     #         response_dict,
     #         200
     #     )
-     
-class CartItemsbyId(Resource):
-    def get(self, id):
-        print("Session:", session)
-        user_id = session.get("user_id")
-        if "user_id" not in session:
-            return make_response({"error": "Not authenticated"}, 401)
+class CartItemsbyUser(Resource):
+    def get(self, user_id):
         
-        user_id = session["user_id"]
-        cart_items = CartItem.query.filter_by(user_id=user_id).all()
+        cart_items = CartItem.query.filter(CartItem.user_id == user_id).all()
+        cart_item_data = []
+        for cart_item in cart_items:
+            item = cart_item.item  # Get the associated item object
+            cart_item_data.append({
+                "item_id": item.id,
+                "name": item.name,
+                "description": item.description,
+                "price": item.price,
+                "quantity": cart_item.quantity,
+                "image": item.image,
+                "category": item.category.name,
+            })
         
-        return make_response({"cart_items": [item.to_dict() for item in cart_items]}, 200)
+        return make_response(cart_item_data, 200)
+
+class ItembyCarts(Resource):
+    def get(self, item_id):
+        item = Item.query.filter_by(id=item_id).first()
+        cart_items = CartItem.query.filter_by(item_id=item.id).all()
+        carts_with_item = []
+        for cart_item in cart_items:
+            if cart_item.user_id == "guest":
+                carts_with_item.append({
+                    "user_id": "guest",
+                    "username": "Guest User",
+                    "quantity": cart_item.quantity
+                })
+            else:
+                user = User.query.filter_by(id=cart_item.user_id).first()
+                if user:
+                    carts_with_item.append({
+                        "user_id": user.id,
+                        "username": user.username,
+                        "quantity": cart_item.quantity
+                    })
+                else:
+                    print(f"Warning: No user found for cart_item with user_id {cart_item.user_id}")
+
+        return make_response(jsonify(carts_with_item), 200)
     
+     
+class CartItemsbyId(Resource): 
     def post(self, id):
         data = request.get_json()
         user_id = session.get("user_id")
@@ -387,14 +441,17 @@ class Purchases(Resource):
             except ValueError:
                 return jsonify({'error': 'Invalid date format, expected "YYYY-MM-DD HH:MM:SS"'}), 400
         else:
-            purchase_date = datetime.now()  
+            purchase_date = datetime.now() 
+
+        print(f"user_id: {user_id}, item_id: {item_id}, quantity: {quantity}, total_price: {total_price}")
+ 
         
         new_purchase = Purchase(
             quantity=quantity,
             total_price=total_price,
             purchase_date=purchase_date,
-            user_id=item.id,
-            item_id=user.id
+            user_id=user.id,
+            item_id=item.id
         )
 
 
@@ -406,25 +463,30 @@ class Purchases(Resource):
             201
         )
         return response
+    
 class UsersbyItem(Resource):
     def get(self, item_id):
         purchases = Purchase.query.filter_by(item_id=item_id).all()
-        users = [purchase.user for purchase in purchases]
-        users_to_dict= [user.to_dict() for user in users]
+        
+        buyers = [purchase.buyer for purchase in purchases]
+       
         response = make_response(
-            users_to_dict,
+            jsonify(buyers),
             200
         )
         return response
-class ItemsByUser(Resource):
-    def get(self, user_id):
-        user = User.query.get(user_id)
-        if not user:
-            return {'error': 'User not found'}, 404
-        purchases = Purchase.query.filter_by(user_id=user.id).all()
-        items = [purchase.item for purchase in purchases]
-        return make_response([item.to_dict() for item in items], 200)
     
+class PurchasesByUser(Resource):
+    def get(self, user_id):
+       purchases = Purchase.query.filter_by(user_id=user_id).all()
+    
+       items = [purchase.purchased_item for purchase in purchases]
+
+       response = make_response(
+           jsonify(items), 
+           200
+        )
+       return response
 
 
 
@@ -435,13 +497,16 @@ api.add_resource(UserbyId, '/users/<int:id>')
 api.add_resource(ItemCategories, '/categories')
 api.add_resource(Items, '/items')
 api.add_resource(ItemsbyId, '/items/<int:id>')
+api.add_resource(ItemsbyUser, '/user/<int:user_id>/items')
+api.add_resource(ItembyCarts, '/item/<int:item_id>/carts')
 api.add_resource(CartItems, '/cart')
 api.add_resource(Purchases, '/purchases')
-api.add_resource(CartItemsbyId, '/cart/<int:id>') #cartitemsbyuser
+api.add_resource(CartItemsbyId, '/cart/<int:id>') 
+api.add_resource(CartItemsbyUser, '/cart/user/<int:user_id>')
 api.add_resource(Login, '/login')  
 api.add_resource(Logout, '/logout')
 api.add_resource(UsersbyItem, '/item/<int:item_id>/purchasers')
-api.add_resource(ItemsByUser, '/purchases/items/<int:user_id>')
+api.add_resource(PurchasesByUser, '/purchases/items/<int:user_id>')
 
 
 
