@@ -91,18 +91,18 @@ function App() {
   }, []);
 
   return (
-    <>
+    <Router>
       <Header cartCount={cart?.length || 0} handleLogout={handleLogout}/>
       <Routes>
         <Route path="/" element={<Home items={saleItems} addToCart={addToCart} />} />
-        <Route path="/cart" element={userId ? (userRole === "buyer" ? (<Cart cart={cart} setCart={setCart} />)
+        <Route path="/cart" element={userId ? (userRole === "buyer" ? (<Cart cart={cart} setCart={setCart} userId={userId} />)
          : userRole === "guest" ? (<Navigate to="/login" />) : (<Navigate to="/" />)) : (<Navigate to="/login" />)}/>
         <Route path="/sell" element={userId ? (userRole === "seller" ? (<Sell items={saleItems} setItems={setSaleItems} userId={userId} />) 
          : userRole === "guest" ? (<Navigate to="/login" />) : (<Navigate to="/" />)) : (<Navigate to="/login" />)}/>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<Login setUserId={setUserId} setUserRole={setUserRole}/>} />
       </Routes>
-    </>
+    </Router>
   );
 }
 

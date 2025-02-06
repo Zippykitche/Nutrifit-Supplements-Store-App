@@ -41,14 +41,9 @@ function Sell({ items = [], setItems, userId }) {
       },
       body: JSON.stringify(newItem),  
     })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-      .then((data) => {
-        setItems([...items, data]);
+    .then((response) => response.json())
+    .then((data) => {
+      setItems((prevItems) => [...prevItems, data]);
       })
       .catch((error) => {
         console.error("Error posting item:", error);

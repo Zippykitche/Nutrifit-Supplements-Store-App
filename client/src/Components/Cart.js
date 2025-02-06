@@ -1,27 +1,29 @@
 import React from "react";
 import SupplementCard from './SupplementCard';
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
-function Cart({ cart, setCart }) {
+function Cart({ cart, setCart, userId }) {
   
   useEffect(() => {
-    fetch("http://127.0.0.1:5555/cart", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include", // Ensure authentication if needed
-      mode: "cors",
-    })
-      .then(response => response.json())
-      .then(data => {
-        setCart(Array.isArray(data) ? data : []); // Ensure it's always an array
+    if (userId) {
+      fetch(`http://127.0.0.1:5555/cart/user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Ensure authentication if needed
+        mode: "cors",
       })
-      .catch(error => {
-        console.error("Error fetching cart:", error);
-        setCart([]); // Set cart to empty if there's an error
-      });
-  }, [setCart]); 
+        .then(response => response.json())
+        .then(data => {
+          setCart(Array.isArray(data) ? data : []); // Ensure it's always an array
+        })
+        .catch(error => {
+          console.error("Error fetching cart:", error);
+          setCart([]); // Set cart to empty if there's an error
+        });
+    }
+  }, [userId, setCart]);
   
 
   const removeFromCart = (id) => {

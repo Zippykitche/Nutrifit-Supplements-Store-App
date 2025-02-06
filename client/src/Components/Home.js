@@ -5,13 +5,6 @@ function Home({ items=[], addToCart }) {
   const [supplements, setSupplements] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    fetch("http://127.0.0.1:5555")
-      .then((response) => response.json())
-      .then((data) => setSupplements(data))
-      .catch((error) => console.error('Error fetching supplements:', error));
-  }, []);
-
   const allSupplements = [...supplements, ...items];
 
   const filteredSupplements = allSupplements.filter((supplement) =>
@@ -46,8 +39,8 @@ function Home({ items=[], addToCart }) {
 
       <div className="supplements-container">
         <div className="supplements-list">
-          {filteredSupplements.map((supplement, index) => (
-            <div key={`${supplement.id}-${index}`} className="supplement-card-container">
+          {filteredSupplements.map((supplement) => (
+            <div key={supplement.id} className="supplement-card-container">
               <SupplementCard
                 name={supplement.name}
                 description={supplement.description}
