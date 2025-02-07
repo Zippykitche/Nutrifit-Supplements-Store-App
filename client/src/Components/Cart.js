@@ -26,15 +26,24 @@ function Cart({ cart, setCart, userId }) {
   }, [userId, setCart]);
   
 
-  const removeFromCart = (id) => {
-    fetch(`http://127.0.0.1:5555/cart/${id}`, {
+  const removeFromCart = (userId, itemId) => {
+    fetch(`http://127.0.0.1:5555/cart/user/${userId}/item/${itemId}`, {
       method: "DELETE",
+      mode: "cors",
+      credentials: "include",
     })
-      .then(() => {
-        setCart(cart.filter((item) => item.id !== id));
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to delete item");
+        }
+        return response.json();
       })
-      .catch((error) => console.error("Error deleting item:", error));
+      .then(() => {
+        setCart(cart.filter((item) => item.item_id !== itemId)); // Remove the item from the UI
+      })
+      .catch(error => console.error("Error deleting item:", error));
   };
+  
 
   return (
     <div className="container mt-5">
@@ -52,7 +61,7 @@ function Cart({ cart, setCart, userId }) {
                 price={item.price}
                 showCartIcon={false}
               />
-              <button className="btn btn-danger mt-2" onClick={() => removeFromCart(item.id)}>
+              <button className="btn btn-danger mt-2" onClick={() => removeFromCart(userId, item.item_id)}>
                 Remove
               </button>
             </div>

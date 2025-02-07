@@ -323,6 +323,26 @@ class CartItemsbyUser(Resource):
         
         return make_response(cart_item_data, 200)
 
+class DeleteCartItembyUser(Resource):
+    
+    def delete(self, user_id, item_id):
+        cart_item = CartItem.query.filter_by(user_id=user_id, item_id=item_id).first()
+
+        if not cart_item:
+            return make_response(jsonify({"error": "Item not found"}), 404)
+
+        db.session.delete(cart_item)
+        db.session.commit()
+
+        response_dict = {"message": "record successfully deleted"}
+        response = make_response(
+            response_dict,
+            200
+        )
+
+        return response
+
+
 class ItembyCarts(Resource):
     def get(self, item_id):
         item = Item.query.filter_by(id=item_id).first()
@@ -352,6 +372,9 @@ class ItembyCarts(Resource):
 class CartItemsbyId(Resource): 
     def delete(self, id):
         cart_item = CartItem.query.filter(CartItem.id==id).first()
+
+        if not cart_item:
+            return make_response(jsonify({"error": "Item not found"}), 404)
 
         db.session.delete(cart_item)
         db.session.commit()
@@ -457,6 +480,7 @@ api.add_resource(CartItems, '/cart')
 api.add_resource(Purchases, '/purchases')
 api.add_resource(CartItemsbyId, '/cart/<int:id>') 
 api.add_resource(CartItemsbyUser, '/cart/user/<int:user_id>')
+api.add_resource(DeleteCartItembyUser, "/cart/user/<int:user_id>/item/<int:item_id>")
 api.add_resource(Login, '/login')  
 api.add_resource(Logout, '/logout')
 api.add_resource(UsersbyItem, '/item/<int:item_id>/purchasers')
