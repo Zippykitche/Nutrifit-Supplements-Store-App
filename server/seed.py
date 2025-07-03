@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Standard library imports
+import os
 import json
 from random import randint, choice as rc
 
@@ -32,7 +33,9 @@ def seed_data():
         db.session.commit()
 
         # Load db.json data
-        data = load_json_data('../client/db.json')
+        BASE_DIR = os.path.dirname(__file__)
+        data_path = os.path.join(BASE_DIR, '..', 'client', 'db.json')
+        data = load_json_data(data_path)
 
         # Seed Users
         print("Seeding users...")
