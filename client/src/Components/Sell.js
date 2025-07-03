@@ -13,7 +13,7 @@ function Sell({ items = [], setItems, userId }) {
   const sellerItems = items.filter((item) => item.user_id === userId);
 //fetch category
   useEffect(() => {
-    fetch("http://127.0.0.1:5555/categories")
+    fetch("https://nutrifit-supplements-store-app.onrender.com/categories")
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
@@ -34,7 +34,7 @@ function Sell({ items = [], setItems, userId }) {
       stock: 10
     };
 
-    fetch("http://127.0.0.1:5555/items", {
+    fetch("https://nutrifit-supplements-store-app.onrender.com/items", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,7 @@ function Sell({ items = [], setItems, userId }) {
   };
 // delete item
   const handleDelete = (itemId) => {
-    fetch(`http://127.0.0.1:5555/items/${itemId}`, {
+    fetch(`https://nutrifit-supplements-store-app.onrender.com/items/${itemId}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -93,7 +93,7 @@ function Sell({ items = [], setItems, userId }) {
       itemCategory_id: parseInt(itemCategory),
     };
 
-    fetch(`http://127.0.0.1:5555/items/${editingItem.id}`, {
+    fetch(`https://nutrifit-supplements-store-app.onrender.com/items/${editingItem.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updatedItem),

@@ -6,7 +6,7 @@ function Cart({ cart, setCart, userId }) {
   
   useEffect(() => {
     if (userId) {
-      fetch(`http://127.0.0.1:5555/cart/user/${userId}`, {
+      fetch(`https://nutrifit-supplements-store-app.onrender.com/cart/user/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +27,7 @@ function Cart({ cart, setCart, userId }) {
   
 
   const removeFromCart = (userId, itemId) => {
-    fetch(`http://127.0.0.1:5555/cart/user/${userId}/item/${itemId}`, {
+    fetch(`https://nutrifit-supplements-store-app.onrender.com/cart/user/${userId}/item/${itemId}`, {
       method: "DELETE",
       mode: "cors",
       credentials: "include",

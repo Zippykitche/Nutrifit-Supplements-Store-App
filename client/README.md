@@ -39,7 +39,7 @@ npx json-server --watch db.json --port 3001
 Start the React app:
 npm start
 
-Access the app in your browser at http://localhost:3000.
+Access the app in your browser at https://nutrifit-supplements-store-app.onrender.com.
 
 Usage
 Explore Supplements: View available supplements on the homepage.

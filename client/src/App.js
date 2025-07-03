@@ -17,7 +17,7 @@ function App() {
 
   // check whether loggedin
   useEffect(() => {
-    fetch("http://127.0.0.1:5555/login", {
+    fetch("https://nutrifit-supplements-store-app.onrender.com/login", {
       method: "GET",
       credentials: "include"
     })
@@ -37,7 +37,7 @@ function App() {
   // logout
   const handleLogout = async () => {
     try {
-      await fetch("http://127.0.0.1:5555/logout", {
+      await fetch("https://nutrifit-supplements-store-app.onrender.com/logout", {
         method: "POST",
         credentials: "include",
       });
@@ -62,7 +62,7 @@ function App() {
       return;
     }
 
-    fetch("http://127.0.0.1:5555/cart", {
+    fetch("https://nutrifit-supplements-store-app.onrender.com/cart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -84,7 +84,7 @@ function App() {
 
   // Fetch items for sale on page load
   useEffect(() => {
-    fetch("http://127.0.0.1:5555/items")
+    fetch("https://nutrifit-supplements-store-app.onrender.com/items")
       .then((res) => res.json())
       .then((data) => setSaleItems(data))
       .catch((error) => console.error("Error fetching items:", error));
