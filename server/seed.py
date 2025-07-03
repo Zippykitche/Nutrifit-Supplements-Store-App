@@ -8,7 +8,7 @@ from random import randint, choice as rc
 from faker import Faker
 
 # Local imports
-from app import app
+from server.app import app
 from server.models import db, User, Item, ItemCategory, CartItem, Purchase
 
 def load_json_data(filepath):
