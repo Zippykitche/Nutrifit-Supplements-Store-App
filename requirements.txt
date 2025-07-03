@@ -49,3 +49,5 @@ typing_extensions==4.12.2
 wcwidth==0.2.13
 Werkzeug==2.2.2
 zipp==3.20.2
+pip freeze > requirements.txt
+
