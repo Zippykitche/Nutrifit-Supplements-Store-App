@@ -9,7 +9,7 @@ from faker import Faker
 
 # Local imports
 from app import app
-from models import db, User, Item, ItemCategory, CartItem, Purchase
+from server.models import db, User, Item, ItemCategory, CartItem, Purchase
 
 def load_json_data(filepath):
     """Load JSON data from a file."""

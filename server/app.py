@@ -16,15 +16,14 @@ from flask_session import Session
 
 
 # Local imports
-from config import app, db, api, token_required
-from models import User, Item, ItemCategory, CartItem, Purchase
+from server.config import app, db, api, token_required
+from server.models import User, Item, ItemCategory, CartItem, Purchase
 
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # For cross-origin cookies
 app.config['SESSION_COOKIE_SECURE'] = False
-app.config['SECRET_KEY'] = 'zippy'
 app.config['SESSION_COOKIE_HTTPONLY'] = False
  
 
