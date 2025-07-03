@@ -15,9 +15,11 @@ from flask_session import Session
 
 
 
+
 # Local imports
 from server.config import app, db, api, token_required
 from server.models import User, Item, ItemCategory, CartItem, Purchase
+from server.seed import seed_data
 
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
@@ -27,6 +29,9 @@ app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = False
  
 
+with app.app_context():
+    db.create_all()
+    seed_data()
 
 Session(app)
 # Views go here!
