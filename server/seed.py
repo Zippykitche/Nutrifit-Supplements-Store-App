@@ -17,7 +17,7 @@ def load_json_data(filepath):
         return json.load(file)
 
 
-if __name__ == '__main__':
+def seed_data():
     fake = Faker()
     with app.app_context():
         print("Starting seed...")
