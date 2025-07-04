@@ -2,11 +2,19 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignIn = () => {
+  const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setUserRole] = useState("");
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+  if (userId) {
+    localStorage.setItem("userId", userId);
+  }
+}, [userId]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

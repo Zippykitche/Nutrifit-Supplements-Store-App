@@ -3,8 +3,8 @@ import SupplementCard from "./SupplementCard";
 
 function Home({ items=[], addToCart }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const allSupplements = items;
 
-  const allSupplements = [...supplements, ...items];
 
   const filteredSupplements = allSupplements.filter((supplement) =>
     (supplement && supplement.name && supplement.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
