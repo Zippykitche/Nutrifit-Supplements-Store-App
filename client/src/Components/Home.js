@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import SupplementCard from "./SupplementCard";
 
 function Home({ items=[], addToCart }) {
-  const [supplements, setSupplements] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const allSupplements = [...supplements, ...items];
