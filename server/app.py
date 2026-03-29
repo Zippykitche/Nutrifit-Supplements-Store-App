@@ -37,7 +37,6 @@ Session(app)
 # Views go here!
 
 @app.route('/')
-@cross_origin()
 def index():
     items = Item.query.all()
     items_to_dict = [item.to_dict() for item in items]
@@ -105,7 +104,6 @@ class Logout(Resource):
 
 # User Resource
 class Users(Resource):
-    @cross_origin( supports_credentials=True)
     def get(self):
         users = User.query.all()
         users_to_dict = [user.to_dict() for user in users]
@@ -115,7 +113,6 @@ class Users(Resource):
         )
         return response
     
-    @cross_origin(supports_credentials=True)
     def post(self):
         data = request.get_json()
 
@@ -173,7 +170,6 @@ class ItemCategories(Resource):
 
 # Items Resource
 class Items(Resource):
-    @cross_origin()
     def get(self):
         items = Item.query.all()
         items_to_dict = [item.to_dict() for item in items]
@@ -183,7 +179,6 @@ class Items(Resource):
         )
         return response
     
-    @cross_origin()
     def post(self):
         data = request.get_json()
         new_item = Item(
@@ -205,7 +200,6 @@ class Items(Resource):
         return response
        
 class ItemsbyId(Resource):
-    @cross_origin()
     def get(self, id):
         item = Item.query.filter(Item.id==id).first()
         response = make_response(
@@ -214,7 +208,6 @@ class ItemsbyId(Resource):
         )
         return response
     
-    @cross_origin()
     def patch(self, id):
         item = Item.query.filter(Item.id==id).first()
         data = request.get_json()
@@ -225,7 +218,6 @@ class ItemsbyId(Resource):
 
         return make_response(item.to_dict(), 200)
     
-    @cross_origin()
     def delete(self, id):
         item = Item.query.filter(Item.id==id).first()
 

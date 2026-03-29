@@ -35,7 +35,7 @@ db.init_app(app)
 api = Api(app)
 
 # Instantiate CORS
-CORS(app, origins=["https://nutrifit-supplements-store-app.onrender.com"], supports_credentials=True)
+CORS(app, origins=["https://nutrifit-frontend-t4eb.onrender.com", "https://nutrifit-supplements-store-app.onrender.com", "http://localhost:3000", "http://127.0.0.1:3000"], supports_credentials=True)
 
 
 # Decorator to check if token is present and valid
