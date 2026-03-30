@@ -9,7 +9,6 @@ from random import randint, choice as rc
 from faker import Faker
 
 # Local imports
-from server.app import app
 from server.models import db, User, Item, ItemCategory, CartItem, Purchase
 
 def load_json_data(filepath):
@@ -19,6 +18,7 @@ def load_json_data(filepath):
 
 
 def seed_data():
+    from server.app import app
     fake = Faker()
     with app.app_context():
         print("Starting seed...")

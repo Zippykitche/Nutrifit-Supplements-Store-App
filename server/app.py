@@ -31,7 +31,8 @@ app.config['SESSION_COOKIE_HTTPONLY'] = False
 
 with app.app_context():
     db.create_all()
-    # seed_data() # Removed automatic seeding to prevent errors on startup
+    if Item.query.count() == 0:
+        seed_data()
 
 Session(app)
 # Views go here!
