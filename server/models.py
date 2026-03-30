@@ -7,7 +7,7 @@ from datetime import datetime
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
-    serialize_rules = ('-cart_items.user', '-purchases.user', '-items.user', '-cart_items.item.cart_items', '-purchases.item.purchases')
+    serialize_rules = ('-cart_items.user', '-purchases.user', '-items.seller', '-cart_items.item.cart_items', '-purchases.item.purchases')
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
@@ -18,7 +18,7 @@ class User(db.Model, SerializerMixin):
     # Relationships
     cart_items = db.relationship('CartItem', backref='user', lazy=True, cascade='all, delete', passive_deletes=True)
     purchases = db.relationship('Purchase', backref='user', lazy=True, cascade='all, delete', passive_deletes=True)
-    items = db.relationship('Item', backref='user', lazy=True)  # Seller relationship
+    items = db.relationship('Item', backref='seller', lazy=True)  # Seller relationship
 
     # Association proxies
     cart_items_details = association_proxy('cart_items', 'item')  # Access items in the cart directly
@@ -54,7 +54,7 @@ class ItemCategory(db.Model, SerializerMixin):
 class Item(db.Model, SerializerMixin):
     __tablename__ = 'items'
 
-    serialize_rules = ('-cart_items.item', '-purchases.item', '-seller.items', '-category.items', '-cart_items.user.cart_items', '-purchases.user.purchases')
+    serialize_rules = ('-cart_items.item', '-purchases.item', '-seller.items', '-category.items', '-cart_items.user', '-purchases.user')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -80,7 +80,7 @@ class Item(db.Model, SerializerMixin):
 class CartItem(db.Model, SerializerMixin):
     __tablename__ = 'cart_items'
 
-    serialize_rules = ('-user.cart_items', '-item.cart_items', '-user.purchases', '-item.purchases')
+    serialize_rules = ('-user.cart_items', '-item.cart_items', '-user.purchases', '-item.purchases', '-user.items')
 
     id = db.Column(db.Integer, primary_key=True)
     quantity = db.Column(db.Integer, nullable=False, default=1)
@@ -95,7 +95,7 @@ class CartItem(db.Model, SerializerMixin):
 class Purchase(db.Model, SerializerMixin):
     __tablename__ = 'purchases'
 
-    serialize_rules = ('-user.purchases', '-item.purchases', '-user.cart_items', '-item.cart_items')
+    serialize_rules = ('-user.purchases', '-item.purchases', '-user.cart_items', '-item.cart_items', '-user.items')
 
     id = db.Column(db.Integer, primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)

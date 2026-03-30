@@ -10,14 +10,14 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import timedelta
-from flask_cors import cross_origin
 from flask_session import Session
 
 
 
 
 # Local imports
-from server.config import app, db, api, token_required
+from server.config import app, db, api
+from server.auth import token_required
 from server.models import User, Item, ItemCategory, CartItem, Purchase
 from server.seed import seed_data
 
@@ -31,7 +31,7 @@ app.config['SESSION_COOKIE_HTTPONLY'] = False
 
 with app.app_context():
     db.create_all()
-    seed_data()
+    # seed_data() # Removed automatic seeding to prevent errors on startup
 
 Session(app)
 # Views go here!
@@ -50,8 +50,11 @@ class Login(Resource):
     
     def post(self):
         data = request.get_json()
-        username = data['username']
-        password = data['password']
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return make_response({"error": "Username and password required"}, 400)
 
         user = User.query.filter_by(username=username).first()
     
@@ -67,7 +70,6 @@ class Login(Resource):
         # Store user ID in session to keep track of authentication
         
         session["user_id"] = user.id
-        print("Session after login:", dict(session))
         session["user_role"] = user.role
     
         response_data = {
@@ -116,28 +118,34 @@ class Users(Resource):
     def post(self):
         data = request.get_json()
 
-        existing_user = User.query.filter_by(username=data.get('username')).first()
+        username = data.get('username')
+        if not username:
+             return jsonify({"message": "Username is required"}), 400
+
+        existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             return jsonify({"message": "Username already taken"}), 400
         
-        hashed_password = generate_password_hash(data['password'], method='sha256')
+        hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
         
         new_user = User(
             username=data['username'],
             email=data['email'],
             password=hashed_password, 
-            role=data['role']
+            role=data.get('role', 'buyer')
             )
 
         db.session.add(new_user)
         db.session.commit()
 
-        response = (jsonify(new_user.to_dict()), 201)
+        response = make_response(jsonify(new_user.to_dict()), 201)
         return response
     
 class UserbyId(Resource):
     def get(self, id):
         user = User.query.filter(User.id==id).first()
+        if not user:
+            return make_response({"error": "User not found"}, 404)
         response = make_response(
             user.to_dict(),
             200
@@ -145,6 +153,8 @@ class UserbyId(Resource):
         return response
     def delete(self, id):
         user = User.query.filter(User.id==id).first()
+        if not user:
+            return make_response({"error": "User not found"}, 404)
 
         db.session.delete(user)
         db.session.commit()
@@ -202,6 +212,8 @@ class Items(Resource):
 class ItemsbyId(Resource):
     def get(self, id):
         item = Item.query.filter(Item.id==id).first()
+        if not item:
+            return make_response({"error": "Item not found"}, 404)
         response = make_response(
             item.to_dict(),
             200
@@ -210,6 +222,8 @@ class ItemsbyId(Resource):
     
     def patch(self, id):
         item = Item.query.filter(Item.id==id).first()
+        if not item:
+            return make_response({"error": "Item not found"}, 404)
         data = request.get_json()
         for key, value in data.items():
             setattr(item, key, value)
@@ -220,6 +234,8 @@ class ItemsbyId(Resource):
     
     def delete(self, id):
         item = Item.query.filter(Item.id==id).first()
+        if not item:
+             return make_response({"error": "Item not found"}, 404)
 
         db.session.delete(item)
         db.session.commit()
@@ -235,6 +251,8 @@ class ItemsbyId(Resource):
 class ItemsbyUser(Resource):
     def get(self, user_id):
         user = User.query.filter_by(id=user_id).first()
+        if not user:
+             return make_response({"error": "User not found"}, 404)
         items = user.items
         item_with_details = []
         for item in items:
@@ -342,6 +360,8 @@ class DeleteCartItembyUser(Resource):
 class ItembyCarts(Resource):
     def get(self, item_id):
         item = Item.query.filter_by(id=item_id).first()
+        if not item:
+            return make_response({"error": "Item not found"}, 404)
         cart_items = CartItem.query.filter_by(item_id=item.id).all()
         carts_with_item = []
         for cart_item in cart_items:
